@@ -1,6 +1,6 @@
 # move to ./github/workflows/
 
-name: Dev-Clock_App-Deploy_to_EC2      #update as appropriate
+name: Clock_App-Deploy_to_EC2      #update as appropriate
 
 on:
   push:
@@ -27,7 +27,7 @@ env:
   #ec2 access values
   EC2_HOST: ${{ vars.EC2_HOST }}
   SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-  KEY: ${{ secrets.SSH_KEY }}
+  SSH_KEY: ${{ secrets.SSH_KEY }}
 
   #sonarqube scan values
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -42,9 +42,9 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # ---------------------------
-      # AWS Auth (OIDC) and ECR login
-      # ---------------------------
+      # ---------------------------------#
+      #   AWS Auth (OIDC) and ECR login  #
+      # ---------------------------------#
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -54,9 +54,9 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      # ---------------------------
-      # Static Code Analysis (SonarQube)
-      # ---------------------------
+      # -----------------------------------#
+      #   Static Code Analysis (SonarQube) #
+      # -----------------------------------#
   
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@master
@@ -69,9 +69,9 @@ jobs:
             -Dsonar.projectName=${{ env.APP_NAME }}
             -Dsonar.sources=.
 
-      # ---------------------------
-      # Build Docker Image
-      # ---------------------------
+      # ---------------------------#
+      #    Build Docker Image      #
+      # ---------------------------#
 
       - name: Build Docker image
         uses: docker/build-push-action@v5
@@ -82,9 +82,9 @@ jobs:
           build-args:
             OWNER=${{ env.OWNER }}
 
-      # ---------------------------
-      # Trivy Image Scan
-      # ---------------------------
+      # ---------------------------#
+      #      Trivy Image Scan      #
+      # ---------------------------#
       - name: Trivy vulnerability scan
         uses: aquasecurity/trivy-action@master
         with:
@@ -101,9 +101,9 @@ jobs:
           name: Trivy-Vulnerability-Report
           path: trivy-report.txt
 
-      # ---------------------------
-      # Push to ECR
-      # ---------------------------
+      # ---------------------------#
+      #        Push to ECR         #
+      # ---------------------------#
       - name: Create ECR repository if not exists
         run: |
           aws ecr describe-repositories --repository-names ${{ env.APP_NAME }} || \
@@ -122,9 +122,9 @@ jobs:
           build-args:
             OWNER=${{ env.OWNER }}
 
-      # ---------------------------
-      # Deploy to Dev EC2 
-      # ---------------------------
+      # ---------------------------#
+      #     Deploy to Dev EC2      #
+      # ---------------------------#
       
       - name: SSH into EC2 machine, deploy new docker image and confirm deployment
         uses: appleboy/ssh-action@v1
@@ -143,9 +143,9 @@ jobs:
               sleep 2
               curl -f http://localhost:${{ env.ACCESS_PORT }} | head -7 || exit 1     #healthcheck. if it curl command fails to access the application, the pipeline fails
 
-      # ---------------------------
-      # Display application url 
-      # ---------------------------
+      # ----------------------------#
+      #   Display application url   # 
+      # ----------------------------#
 
       - name: output deployment information
         run: |

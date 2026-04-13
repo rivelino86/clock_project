@@ -1,6 +1,6 @@
 FROM nginx:alpine
 
-ARG OWNER="YourName"
+ARG OWNER="rivelino"
 
 COPY clock.html /usr/share/nginx/html/index.html
 
